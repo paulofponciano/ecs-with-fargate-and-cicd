@@ -35,14 +35,16 @@ module "vpc" {
   enable_dns_hostnames   = true
 }
 
-# module "s3_bucket" {
-#   source        = "terraform-aws-modules/s3-bucket/aws"
-#   version       = "3.10.1"
-#   create_bucket = true
+module "s3_bucket" {
+  source        = "terraform-aws-modules/s3-bucket/aws"
+  version       = ">= 3.10.1"
+  create_bucket = true
 
-#   bucket = var.bucket_name
+  bucket = "${var.env_prefix}-${var.environment}-codepipeline-bucket"
 
-#   versioning = {
-#     enabled = false
-#   }
-# }
+  versioning = {
+    enabled = false
+  }
+
+  tags = var.tags
+}

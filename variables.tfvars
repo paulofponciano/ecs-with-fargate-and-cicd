@@ -28,4 +28,5 @@ scaling_in_cooldown     = 600
 scaling_out_adjustment  = 2
 scaling_in_adjustment   = -2
 
-# bucket_name = "myproject-assets-bucket"
+github_repo   = "paulofponciano/webapp-color"
+github_branch = "master"

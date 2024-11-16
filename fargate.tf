@@ -16,8 +16,12 @@ resource "aws_ecs_service" "this" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.this.id
-    container_name   = "nginx"
+    container_name   = "app-container"
     container_port   = 80
+  }
+
+  deployment_controller {
+    type = "CODE_DEPLOY"
   }
 
   lifecycle {
@@ -40,8 +44,8 @@ resource "aws_ecs_task_definition" "this" {
     "secrets": [],
     "environment": [],
     "essential": true,
-    "image": "nginx",        
-    "name": "nginx",
+    "image": "${aws_ecr_repository.app_repository.repository_url}:latest",        
+    "name": "app-container",
     "portMappings": [
       {
         "containerPort": 80

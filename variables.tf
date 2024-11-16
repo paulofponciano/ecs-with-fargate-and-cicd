@@ -103,7 +103,13 @@ variable "min_task" {
   type        = number
 }
 
-# variable "bucket_name" {
-#   description = "S3 Bucket for WordPress assets."
-#   type        = string
-# }
+variable "github_repo" {
+  description = "GitHub repo (some-user/my-repo)."
+  type        = string
+}
+
+variable "github_branch" {
+  description = "GitHub branch."
+  type        = string
+}
+
