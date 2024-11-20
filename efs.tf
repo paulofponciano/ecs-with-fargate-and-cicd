@@ -1,3 +1,5 @@
+# EFS
+
 resource "aws_efs_file_system" "this" {
   creation_token  = "${var.env_prefix}-${var.environment}"
   encrypted       = true
