@@ -98,7 +98,7 @@ resource "aws_iam_role_policy_attachment" "task_policy_attach" {
   policy_arn = aws_iam_policy.task_policy.arn
 }
 
-# CodePipeline
+# CODEBUILD
 
 data "aws_iam_policy_document" "codebuild_assume_role" {
   statement {
@@ -149,6 +149,8 @@ resource "aws_iam_role_policy" "codebuild_policy" {
   })
 }
 
+# CODEPIPELINE
+
 data "aws_iam_policy_document" "codepipeline_assume_role" {
   statement {
     effect  = "Allow"
@@ -176,6 +178,15 @@ data "aws_iam_policy_document" "codepipeline_policy" {
   }
 
   statement {
+    effect  = "Allow"
+    actions = ["iam:PassRole"]
+    resources = [
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.env_prefix}-task-execution-role-${var.environment}",
+      "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.env_prefix}-task-role-${var.environment}"
+    ]
+  }
+
+  statement {
     effect    = "Allow"
     actions   = ["codestar-connections:UseConnection"]
     resources = [aws_codestarconnections_connection.github_connection.arn]
@@ -186,12 +197,38 @@ data "aws_iam_policy_document" "codepipeline_policy" {
     actions   = ["codebuild:StartBuild", "codebuild:BatchGetBuilds"]
     resources = [aws_codebuild_project.codebuild.arn]
   }
+
+  statement {
+    effect    = "Allow"
+    actions   = ["ecs:RegisterTaskDefinition"]
+    resources = ["arn:aws:ecs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:task-definition/*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "codedeploy:CreateDeployment",
+      "codedeploy:GetDeploymentConfig",
+      "codedeploy:GetDeployment",
+      "codedeploy:GetApplication",
+      "codedeploy:GetApplicationRevision",
+      "codedeploy:RegisterApplicationRevision"
+    ]
+    resources = [
+      aws_codedeploy_app.ecs_app.arn,
+      aws_codedeploy_deployment_group.ecs_deployment_group.arn,
+      "arn:aws:codedeploy:${var.aws_region}:${data.aws_caller_identity.current.account_id}:deploymentconfig:CodeDeployDefault.ECSAllAtOnce"
+    ]
+  }
 }
+
 
 resource "aws_iam_role_policy" "codepipeline_policy" {
   role   = aws_iam_role.codepipeline_role.id
   policy = data.aws_iam_policy_document.codepipeline_policy.json
 }
+
+# CODEDEPLOY
 
 data "aws_iam_policy_document" "codedeploy_assume_role" {
   statement {
@@ -211,22 +248,91 @@ resource "aws_iam_role" "codedeploy_role" {
 
 resource "aws_iam_role_policy" "codedeploy_policy" {
   role = aws_iam_role.codedeploy_role.id
+
   policy = jsonencode({
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = ["ecs:UpdateService", "ecs:DescribeServices"]
+        Effect = "Allow"
+        Action = [
+          "ecs:UpdateService",
+          "ecs:DescribeServices",
+          "ecs:CreateTaskSet",
+          "ecs:DeleteTaskSet",
+          "ecs:UpdateServicePrimaryTaskSet"
+        ]
         Resource = "*"
       },
       {
-        Effect   = "Allow"
-        Action   = ["elasticloadbalancing:DescribeTargetGroups", "elasticloadbalancing:ModifyTargetGroup"]
+        Effect = "Allow"
+        Action = [
+          "elasticloadbalancing:*"
+        ]
         Resource = "*"
       },
       {
-        Effect   = "Allow"
-        Action   = ["codedeploy:*", "cloudwatch:*", "logs:*"]
+        Effect = "Allow"
+        Action = [
+          "autoscaling:CompleteLifecycleAction",
+          "autoscaling:DeleteLifecycleHook",
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeLifecycleHooks",
+          "autoscaling:PutLifecycleHook",
+          "autoscaling:RecordLifecycleActionHeartbeat",
+          "autoscaling:CreateAutoScalingGroup",
+          "autoscaling:CreateOrUpdateTags",
+          "autoscaling:UpdateAutoScalingGroup",
+          "autoscaling:EnableMetricsCollection",
+          "autoscaling:DescribePolicies",
+          "autoscaling:DescribeScheduledActions",
+          "autoscaling:DescribeNotificationConfigurations",
+          "autoscaling:SuspendProcesses",
+          "autoscaling:ResumeProcesses",
+          "autoscaling:AttachLoadBalancers",
+          "autoscaling:AttachLoadBalancerTargetGroups",
+          "autoscaling:PutScalingPolicy",
+          "autoscaling:PutScheduledUpdateGroupAction",
+          "autoscaling:PutNotificationConfiguration",
+          "autoscaling:PutWarmPool",
+          "autoscaling:DescribeScalingActivities",
+          "autoscaling:DeleteAutoScalingGroup",
+        ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "codedeploy:*",
+          "cloudwatch:*",
+          "logs:*"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:GetObjectVersion",
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:GetBucketLocation",
+          "s3:PutObjectAcl"
+        ]
+        Resource = [
+          module.s3_bucket.s3_bucket_arn,
+          "${module.s3_bucket.s3_bucket_arn}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = ["iam:PassRole"]
+        Resource = [
+          "*"
+        ]
+        Condition = {
+          StringLike = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
+          }
+        }
       }
     ]
   })

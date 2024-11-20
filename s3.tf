@@ -1,3 +1,5 @@
+# BUCKET POLICY
+
 resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_pab" {
   bucket                  = module.s3_bucket.s3_bucket_id
   block_public_acls       = true
@@ -5,6 +7,8 @@ resource "aws_s3_bucket_public_access_block" "codepipeline_bucket_pab" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# VPC GATEWAY ENDPOINT
 
 resource "aws_vpc_endpoint" "s3_gw_endpoint" {
   vpc_id          = module.vpc.vpc_id

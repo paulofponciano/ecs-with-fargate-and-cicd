@@ -1,6 +1,10 @@
+# CLUSTER
+
 resource "aws_ecs_cluster" "this" {
   name = "${var.env_prefix}-${var.environment}"
 }
+
+# SERVICE
 
 resource "aws_ecs_service" "this" {
   name             = "${var.env_prefix}-${var.environment}"
@@ -15,9 +19,9 @@ resource "aws_ecs_service" "this" {
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.this.id
+    target_group_arn = aws_lb_target_group.blue.id
     container_name   = "app-container"
-    container_port   = 80
+    container_port   = 8080
   }
 
   deployment_controller {
@@ -29,6 +33,8 @@ resource "aws_ecs_service" "this" {
   }
 
 }
+
+# TASK DEFINITION
 
 resource "aws_ecs_task_definition" "this" {
   family                   = "${var.env_prefix}-${var.environment}"
@@ -48,7 +54,7 @@ resource "aws_ecs_task_definition" "this" {
     "name": "app-container",
     "portMappings": [
       {
-        "containerPort": 80
+        "containerPort": 8080
       }
     ],
     "mountPoints": [
@@ -62,7 +68,7 @@ resource "aws_ecs_task_definition" "this" {
       "options": {
         "awslogs-group": "${aws_cloudwatch_log_group.app.name}",
         "awslogs-region": "${var.aws_region}",
-        "awslogs-stream-prefix": "app"
+        "awslogs-stream-prefix": "ecs"
       }
     }
   }
@@ -77,8 +83,10 @@ CONTAINER_DEFINITION
   }
 }
 
+# CLOUDWATCH
+
 resource "aws_cloudwatch_log_group" "app" {
-  name              = "/${var.env_prefix}/${var.environment}/task"
+  name              = "/ecs/${var.env_prefix}/${var.environment}/task"
   tags              = var.tags
   retention_in_days = var.log_retention_in_days
 }
@@ -118,6 +126,8 @@ resource "aws_cloudwatch_metric_alarm" "cpu_utilization_low" {
 
   alarm_actions = [aws_appautoscaling_policy.scale_in.arn]
 }
+
+# SCALING
 
 resource "aws_appautoscaling_target" "this" {
   max_capacity       = var.max_task

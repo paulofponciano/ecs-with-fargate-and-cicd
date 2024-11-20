@@ -1,12 +1,18 @@
+# CONNECTION
+
 resource "aws_codestarconnections_connection" "github_connection" {
   name          = "github-connection"
   provider_type = "GitHub"
 }
 
+# ECR
+
 resource "aws_ecr_repository" "app_repository" {
-  name                 = "${var.env_prefix}-${var.environment}-app-registry"
+  name                 = "${var.env_prefix}-${var.environment}-app"
   image_tag_mutability = "MUTABLE"
 }
+
+# CODEBUILD
 
 resource "aws_codebuild_project" "codebuild" {
   name         = "${var.env_prefix}-${var.environment}-build"
@@ -18,13 +24,41 @@ resource "aws_codebuild_project" "codebuild" {
 
   environment {
     compute_type    = "BUILD_GENERAL1_SMALL"
-    image           = "aws/codebuild/standard:7.0"
+    image           = "aws/codebuild/docker:18.09.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
 
     environment_variable {
       name  = "REPOSITORY_URI"
       value = aws_ecr_repository.app_repository.repository_url
+    }
+    environment_variable {
+      name  = "AWS_DEFAULT_REGION"
+      value = var.aws_region
+    }
+    environment_variable {
+      name  = "IMAGE_REPO_NAME"
+      value = "${var.env_prefix}-${var.environment}-app"
+    }
+    environment_variable {
+      name  = "AWS_ACCOUNT_ID"
+      value = data.aws_caller_identity.current.account_id
+    }
+    environment_variable {
+      name  = "ENV_PREFIX"
+      value = var.env_prefix
+    }
+    environment_variable {
+      name  = "ENVIRONMENT"
+      value = var.environment
+    }
+    environment_variable {
+      name  = "TASK_MEMORY"
+      value = var.task_memory
+    }
+    environment_variable {
+      name  = "TASK_CPU"
+      value = var.task_cpu
     }
   }
 
@@ -34,35 +68,11 @@ resource "aws_codebuild_project" "codebuild" {
   }
 }
 
+# CODEDEPLOY
+
 resource "aws_codedeploy_app" "ecs_app" {
   name             = "${var.env_prefix}-${var.environment}-ecs-app"
   compute_platform = "ECS"
-}
-
-resource "aws_lb_target_group" "blue" {
-  name        = "${var.env_prefix}-${var.environment}-blue-tg"
-  port        = 8080
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = module.vpc.vpc_id
-
-  health_check {
-    path    = "/"
-    matcher = "200"
-  }
-}
-
-resource "aws_lb_target_group" "green" {
-  name        = "${var.env_prefix}-${var.environment}-green-tg"
-  port        = 8080
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = module.vpc.vpc_id
-
-  health_check {
-    path    = "/"
-    matcher = "200"
-  }
 }
 
 resource "aws_codedeploy_deployment_group" "ecs_deployment_group" {
@@ -114,6 +124,8 @@ resource "aws_codedeploy_deployment_group" "ecs_deployment_group" {
   }
 }
 
+# CODEPIPELINE
+
 resource "aws_codepipeline" "codepipeline" {
   name     = "${var.env_prefix}-${var.environment}-pipeline"
   role_arn = aws_iam_role.codepipeline_role.arn
@@ -131,7 +143,7 @@ resource "aws_codepipeline" "codepipeline" {
       owner            = "AWS"
       provider         = "CodeStarSourceConnection"
       version          = "1"
-      output_artifacts = ["source_output"]
+      output_artifacts = ["SourceArtifact"]
 
       configuration = {
         ConnectionArn    = aws_codestarconnections_connection.github_connection.arn
@@ -148,8 +160,8 @@ resource "aws_codepipeline" "codepipeline" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["source_output"]
-      output_artifacts = ["build_output"]
+      input_artifacts  = ["SourceArtifact"]
+      output_artifacts = ["BuildArtifact"]
       version          = "1"
 
       configuration = {
@@ -164,13 +176,17 @@ resource "aws_codepipeline" "codepipeline" {
       name            = "Deploy"
       category        = "Deploy"
       owner           = "AWS"
-      provider        = "CodeDeploy"
-      input_artifacts = ["build_output"]
+      provider        = "CodeDeployToECS"
+      input_artifacts = ["BuildArtifact"]
       version         = "1"
 
       configuration = {
-        ApplicationName     = aws_codedeploy_app.ecs_app.name
-        DeploymentGroupName = aws_codedeploy_deployment_group.ecs_deployment_group.deployment_group_name
+        ApplicationName                = aws_codedeploy_app.ecs_app.name
+        DeploymentGroupName            = aws_codedeploy_deployment_group.ecs_deployment_group.deployment_group_name
+        TaskDefinitionTemplateArtifact = "BuildArtifact"
+        AppSpecTemplateArtifact        = "BuildArtifact"
+        TaskDefinitionTemplatePath     = "taskdef.json"
+        AppSpecTemplatePath            = "appspec.yaml"
       }
     }
   }
