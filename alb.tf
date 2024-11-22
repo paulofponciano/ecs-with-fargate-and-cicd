@@ -1,3 +1,5 @@
+# TARGET GROUP - BLUE/GREEN
+
 resource "aws_lb_target_group" "blue" {
   name        = "${var.env_prefix}-${var.environment}-blue-tg"
   port        = 8080
@@ -23,6 +25,8 @@ resource "aws_lb_target_group" "green" {
     matcher = "200"
   }
 }
+
+# LISTENER HTTPS
 
 resource "aws_lb_listener" "https" {
   load_balancer_arn = module.alb.arn

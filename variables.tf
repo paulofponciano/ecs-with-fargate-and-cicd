@@ -113,13 +113,3 @@ variable "github_branch" {
   type        = string
 }
 
-# variable "github_token" {
-#   description = "GitHub token (PAT)."
-#   type        = string
-# }
-
-# variable "github_owner" {
-#   description = "GitHub owner (account name)."
-#   type        = string
-# }
-

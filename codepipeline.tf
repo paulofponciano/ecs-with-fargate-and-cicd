@@ -28,6 +28,7 @@ resource "aws_codebuild_project" "codebuild" {
     type            = "LINUX_CONTAINER"
     privileged_mode = true
 
+    # VARIABLES TO BE USED IN THE BUILDSPEC FILE
     environment_variable {
       name  = "REPOSITORY_URI"
       value = aws_ecr_repository.app_repository.repository_url
@@ -143,7 +144,7 @@ resource "aws_codepipeline" "codepipeline" {
       owner            = "AWS"
       provider         = "CodeStarSourceConnection"
       version          = "1"
-      output_artifacts = ["SourceArtifact"]
+      output_artifacts = ["SourceArt"]
 
       configuration = {
         ConnectionArn    = aws_codestarconnections_connection.github_connection.arn
@@ -160,8 +161,8 @@ resource "aws_codepipeline" "codepipeline" {
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"
-      input_artifacts  = ["SourceArtifact"]
-      output_artifacts = ["BuildArtifact"]
+      input_artifacts  = ["SourceArt"]
+      output_artifacts = ["BuildArt"]
       version          = "1"
 
       configuration = {
@@ -177,16 +178,16 @@ resource "aws_codepipeline" "codepipeline" {
       category        = "Deploy"
       owner           = "AWS"
       provider        = "CodeDeployToECS"
-      input_artifacts = ["BuildArtifact"]
+      input_artifacts = ["BuildArt"]
       version         = "1"
 
       configuration = {
         ApplicationName                = aws_codedeploy_app.ecs_app.name
         DeploymentGroupName            = aws_codedeploy_deployment_group.ecs_deployment_group.deployment_group_name
-        TaskDefinitionTemplateArtifact = "BuildArtifact"
-        AppSpecTemplateArtifact        = "BuildArtifact"
-        TaskDefinitionTemplatePath     = "taskdef.json"
-        AppSpecTemplatePath            = "appspec.yaml"
+        TaskDefinitionTemplateArtifact = "BuildArt"
+        AppSpecTemplateArtifact        = "BuildArt"
+        TaskDefinitionTemplatePath     = "taskdef.json" # APPLICATION REPOSITORY TASKDEF FILE
+        AppSpecTemplatePath            = "appspec.yaml" # APPLICATION REPOSITORY APPSPEC FILE
       }
     }
   }
