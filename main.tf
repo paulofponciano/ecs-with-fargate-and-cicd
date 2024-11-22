@@ -1,5 +1,7 @@
 # MODULES
 
+# LOAD BALANCER (ALB)
+
 module "alb" {
   source                     = "terraform-aws-modules/alb/aws"
   version                    = ">= 5.0"
@@ -12,6 +14,7 @@ module "alb" {
   tags                       = var.tags
 }
 
+# CERTIFICATE MANAGER (ACM)
 
 module "acm" {
   source            = "terraform-aws-modules/acm/aws"
@@ -21,6 +24,8 @@ module "acm" {
   validation_method = "DNS"
   tags              = var.tags
 }
+
+# VPC
 
 module "vpc" {
   source                 = "terraform-aws-modules/vpc/aws"
@@ -36,6 +41,8 @@ module "vpc" {
   version                = ">=2.0"
   enable_dns_hostnames   = true
 }
+
+# S3
 
 module "s3_bucket" {
   source        = "terraform-aws-modules/s3-bucket/aws"
