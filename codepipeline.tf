@@ -23,8 +23,8 @@ resource "aws_codebuild_project" "codebuild" {
   }
 
   environment {
-    compute_type    = "BUILD_GENERAL1_SMALL"
-    image           = "aws/codebuild/docker:18.09.0"
+    compute_type = "BUILD_GENERAL1_SMALL"
+    image           = "aws/codebuild/standard:7.0"
     type            = "LINUX_CONTAINER"
     privileged_mode = true
 
