@@ -29,8 +29,8 @@ github_branch = "master"
 
 log_retention_in_days   = 7
 desired_count           = 2
-task_memory             = 2048
-task_cpu                = 1024
+task_memory             = 512
+task_cpu                = 256
 task_cpu_low_threshold  = 25
 task_cpu_high_threshold = 80
 max_task                = 5
