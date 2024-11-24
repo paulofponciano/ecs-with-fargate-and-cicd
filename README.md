@@ -3,6 +3,10 @@
 
 # Amazon ECS running on FARGATE with CI/CD
 
+## Arch
+
+<p align="center"><img src="./img/arch.png" alt="arch"></p>
+
 ## Provisioning with OpenTofu
 
 Execute:
