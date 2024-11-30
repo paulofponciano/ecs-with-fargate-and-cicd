@@ -39,4 +39,4 @@ scaling_out_cooldown    = 120
 scaling_in_cooldown     = 600
 scaling_out_adjustment  = 2
 scaling_in_adjustment   = -2
-container_port = 8080
+container_port          = 8080
