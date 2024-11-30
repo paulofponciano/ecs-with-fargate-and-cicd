@@ -51,10 +51,10 @@ resource "aws_ecs_task_definition" "this" {
     "environment": [],
     "essential": true,
     "image": "${aws_ecr_repository.app_repository.repository_url}:latest",        
-    "name": "app-container",
+    "name": "${var.env_prefix}-${var.environment}-app",
     "portMappings": [
       {
-        "containerPort": "${var.container_port}"
+        "containerPort": ${var.container_port}
       }
     ],
     "mountPoints": [
