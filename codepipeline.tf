@@ -61,6 +61,10 @@ resource "aws_codebuild_project" "codebuild" {
       name  = "TASK_CPU"
       value = var.task_cpu
     }
+    environment_variable {
+      name  = "CONTAINER_PORT"
+      value = var.container_port
+    }
   }
 
   source {

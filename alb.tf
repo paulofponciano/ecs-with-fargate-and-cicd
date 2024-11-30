@@ -2,7 +2,7 @@
 
 resource "aws_lb_target_group" "blue" {
   name        = "${var.env_prefix}-${var.environment}-blue-tg"
-  port        = 8080
+  port        = var.container_port
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = module.vpc.vpc_id
@@ -15,7 +15,7 @@ resource "aws_lb_target_group" "blue" {
 
 resource "aws_lb_target_group" "green" {
   name        = "${var.env_prefix}-${var.environment}-green-tg"
-  port        = 8080
+  port        = var.container_port
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = module.vpc.vpc_id

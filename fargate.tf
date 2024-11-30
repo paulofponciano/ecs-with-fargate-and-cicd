@@ -21,7 +21,7 @@ resource "aws_ecs_service" "this" {
   load_balancer {
     target_group_arn = aws_lb_target_group.blue.id
     container_name   = "app-container"
-    container_port   = 8080
+    container_port   = var.container_port
   }
 
   deployment_controller {
@@ -54,7 +54,7 @@ resource "aws_ecs_task_definition" "this" {
     "name": "app-container",
     "portMappings": [
       {
-        "containerPort": 8080
+        "containerPort": "${var.container_port}"
       }
     ],
     "mountPoints": [

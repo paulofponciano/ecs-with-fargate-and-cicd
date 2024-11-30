@@ -103,6 +103,11 @@ variable "min_task" {
   type        = number
 }
 
+variable "container_port" {
+  description = "App container port."
+  type        = number
+}
+
 variable "github_repo" {
   description = "GitHub repo (some-user/my-repo)."
   type        = string
