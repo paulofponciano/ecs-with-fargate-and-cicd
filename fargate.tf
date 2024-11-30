@@ -20,7 +20,7 @@ resource "aws_ecs_service" "this" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.blue.id
-    container_name   = "app-container"
+    container_name   = "${var.env_prefix}-${var.environment}-app"
     container_port   = var.container_port
   }
 
