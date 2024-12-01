@@ -115,7 +115,7 @@ resource "aws_cloudwatch_metric_alarm" "cpu_utilization_low" {
   evaluation_periods  = "1"
   metric_name         = "CPUUtilization"
   namespace           = "AWS/ECS"
-  period              = "120" #original 60
+  period              = "60"
   statistic           = "Average"
   threshold           = var.task_cpu_low_threshold
 
