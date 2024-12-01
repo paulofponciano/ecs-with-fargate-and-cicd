@@ -2,19 +2,3 @@ version: 3
 projects:
   - name: ecs-with-fargate-and-cicd
     dir: .
-    autoplan:
-      enabled: true
-      when_modified:
-        - "*.tf"
-        - "*.tfvars"
-    workflow: default
-workflows:
-  default:
-    plan:
-      steps:
-        - init
-        - run: terraform plan -var-file=variables.tfvars
-    apply:
-      steps:
-        - init
-        - run: terraform apply -var-file=variables.tfvars -auto-approve
