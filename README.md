@@ -9,7 +9,7 @@
 
 ## Blog post
 
-[ECS Blue/Green com CodePipeline - Provisionado com Terraform](https://dev.to/aws-builders/ecs-bluegreen-com-codepipeline-provisionado-com-terraform-572f)
+[ECS Blue/Green com CodePipeline - Provisionado com Terraform](https://dev.to/aws-builders/ecs-bluegreen-com-codepipeline-provisionado-com-terraform-572f).
 
 ## Provisioning with OpenTofu
 

@@ -1,0 +1,5 @@
+version: 3
+projects:
+  - name: ecs-with-fargate-and-cicd
+    dir: .
+    workflow: default
