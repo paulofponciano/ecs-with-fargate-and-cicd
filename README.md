@@ -7,6 +7,8 @@
 
 <p align="center"><img src="./img/arch.png" alt="arch"></p>
 
+## Blog post
+
 ## Provisioning with OpenTofu
 
 Execute:
