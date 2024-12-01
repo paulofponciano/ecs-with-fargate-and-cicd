@@ -9,11 +9,6 @@
 
 ## Blog post
 
-```sh
-atlantis plan -d . -- -var-file=variables.tfvars
-atlantis apply -d . -- -var-file=variables.tfvars
-```
-
 [ECS Blue/Green com CodePipeline - Provisionado com Terraform](https://dev.to/aws-builders/ecs-bluegreen-com-codepipeline-provisionado-com-terraform-572f).
 
 ## Provisioning with OpenTofu
